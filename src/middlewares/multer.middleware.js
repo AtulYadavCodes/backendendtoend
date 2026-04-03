@@ -1,23 +1,11 @@
-import multer from 'multer';
-import { StandardError } from '../utils/error_standard.js';
-
-const storage = multer.memoryStorage();
-
-const fileFilter = (_req, file, cb) => {
-  if (!file.mimetype.startsWith('image/')) {
-    cb(new StandardError('Only image uploads are allowed', 400), false);
-    return;
-  }
-
-  cb(null, true);
-};
-
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024,
-  },
-});
-
-export default upload;
+import multer from "multer";
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/temp')
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, uniqueSuffix + '-' + file.originalname)
+    }  
+})
+export const upload = multer({ storage });

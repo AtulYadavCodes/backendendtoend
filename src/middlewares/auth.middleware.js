@@ -1,23 +1,15 @@
-import jwt from 'jsonwebtoken';
-import asyncHandler from '../utils/asynchandler.js';
-import { StandardError } from '../utils/error_standard.js';
-
-const authMiddleware = asyncHandler(async (req, _res, next) => {
-  const header = req.headers.authorization;
-
-  if (!header || !header.startsWith('Bearer ')) {
-    throw new StandardError('Authorization token is missing', 401);
-  }
-
-  const token = header.slice(7);
-  const secret = process.env.JWT_SECRET;
-
-  if (!secret) {
-    throw new StandardError('JWT_SECRET is not configured', 500);
-  }
-
-  req.user = jwt.verify(token, secret);
-  next();
-});
-
-export default authMiddleware;
+import { User } from "../models/users.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import error from "../utils/error_structurer.js"
+import jwt from "jsonwebtoken";
+export const verifyJWT=asyncHandler(async(req,res,next)=>{
+    const token= req.cookies?.accessToken || req.headers("Authorization")?.replace("Bearer ","")
+    if(!token)
+        throw new error(401,"Not authorized, token missing");
+       const decodedToken= jwt.verify(token,process.env.JWT_SECRET)
+       const user= await User.findById(decodedToken.userId).select("-password -refreshtoken");
+       if(!user)
+        throw new error(401,"Not authorized, user not found");
+         req.user=user;
+            next();
+    })
