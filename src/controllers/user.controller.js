@@ -1,9 +1,9 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import error_structurer from "../utils/error_structurer.js"
-import {User} from "../models/users.model.js";
+import errorhandler from "../utils/errorhandler.js"
+import {User} from "../models/user.model.js";
 import uploadoncloudinary from "../utils/uploadoncloudinary.js";
-import { response } from "express";
 import responseHandler from "../utils/responseHandler.js"
+import jwt from "jsonwebtoken";
 const generateAccessTokenandRefreshToken=async(userId)=>{
     try {
         const user=await User.findById(userId);
@@ -14,7 +14,7 @@ const generateAccessTokenandRefreshToken=async(userId)=>{
        await user.save({validateBeforeSave: false});
         return {accessToken,refreshToken};
     } catch (error) {
-        throw new error_structurer(500, "Token generation failed");
+        throw new errorhandler(500, "Token generation failed");
     }
 }
 const registerUser=asyncHandler(async(req,res,next)=>{
@@ -22,18 +22,18 @@ const registerUser=asyncHandler(async(req,res,next)=>{
     console.log(fullname,email,password);
     if(fullname==""||email==""||password=="")
     {
-        throw new error_structurer(400,"All is required");
+        throw new errorhandler(400,"All is required");
     }
     const userchecker=await User.findOne({email:email})
     if(userchecker)
-        throw new error_structurer(400,"User already exists");
+        throw new errorhandler(400,"User already exists");
    const avatarlocalpath= req.file?.path
    if(!avatarlocalpath)
-     throw new error_structurer(400,"Avatar is required");
+     throw new errorhandler(400,"Avatar is required");
     const cloudinaryresponse=await uploadoncloudinary(avatarlocalpath,{ folder:"avatars"});
 
     if(!cloudinaryresponse)
-        throw new error_structurer(500,"Image not uploaded");
+        throw new errorhandler(500,"Image not uploaded");
    const user=await User.create({
         fullname,
         username,
@@ -44,7 +44,7 @@ const registerUser=asyncHandler(async(req,res,next)=>{
     const createduser= await User.findById(user._id).select("-password -refreshtoken");
     if(!createduser)
     {
-        throw new error_structurer(500,"User not created");        
+        throw new errorhandler(500,"User not created");        
     }
     return res.status(200).json(
         new responseHandler(200,"User created successfully",createduser)
@@ -55,14 +55,14 @@ const loginuser=asyncHandler(async(req,res,next)=>{
     const {email,password}=req.body;
     if(email==""||password=="")
     {
-        throw new error_structurer(400,"All fields are required");
+        throw new errorhandler(400,"All fields are required");
     }
     const userchecker=await User.findOne({email:email});
     if(!userchecker)
-        throw new error_structurer(400,"User does not exist");
+        throw new errorhandler(400,"User does not exist");
     const isvalidpassword=await userchecker.isValidPassword(password);
     if(!isvalidpassword)
-        throw new error_structurer(400,"Invalid credentials");  
+        throw new errorhandler(400,"Invalid credentials");  
     const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(userchecker._id);
     const loggedinuser= await User.findById(userchecker._id).select("-password -refreshtoken");
     const options={
@@ -90,7 +90,7 @@ const loginuser=asyncHandler(async(req,res,next)=>{
  const refreshAccessToken=asyncHandler(async(req,res)=>{
     const incomingRefreshToken=req.cookies.refreshToken;
     if(!incomingRefreshToken)
-        throw new error_structurer(401,"Refresh token not found");
+        throw new errorhandler(401,"Refresh token not found");
     try {
 
 
@@ -104,17 +104,17 @@ const loginuser=asyncHandler(async(req,res,next)=>{
         const decoded=jwt.verify(incomingRefreshToken,process.env.JWT_REFRESH_SECRET);
     const user=await User.findById(decoded?.userId);
     if(!user)
-        throw new error_structurer(401,"User not found");
+        throw new errorhandler(401,"User not found");
     if(!(user.refreshTokens==(incomingRefreshToken)))
-        throw new error_structurer(401,"Invalid refresh token");
-    const {accessToken,refreshToken}=await user.generateAccessToken(user._id);
+        throw new errorhandler(401,"Invalid refresh token");
+    const {accessToken,refreshToken}=await user.generateAccessTokenandRefreshToken(user._id);
     const options={
         httpOnly:true,
         secure: true
       }
       return res.status(200).cookie("accessToken",accessToken,options).cookie("refreshToken",refreshToken,options).json(new responseHandler(200,"Access token refreshed successfully",{accessToken:accessToken}))
     } catch (error) {
-        throw new error_structurer(401,error?.message||"Invalid refresh token");
+        throw new errorhandler(401,error?.message||"Invalid refresh token");
     }
 })
 
@@ -123,7 +123,7 @@ const updateuseravatar=asyncHandler(async(req,res)=>{
     const avatar=await uploadoncloudinary(avatarlocalpath);
     if(!avatar.url)
     {
-        throw new error_structurer(500,"error in uploading avatar");
+        throw new errorhandler(500,"error in uploading avatar");
     }
     const updateduser=await User.findByIdAndUpdate(
         req.user._id,
@@ -142,7 +142,7 @@ const updateuserpassword=asyncHandler(async(req,res)=>{
     const user=await User.findById(req.user._id);
     const isvalidpassword=await user.isValidPassword(oldpassword);
     if(!isvalidpassword)
-        throw new error_structurer(400,"Old password is incorrect");
+        throw new errorhandler(400,"Old password is incorrect");
     user.password=newpassword;
     await user.save();
     return res.status(200).json(new responseHandler(200,"Password updated successfully",{}));
@@ -151,7 +151,7 @@ const updateuseremail=asyncHandler(async(req,res)=>{
     const {newemail}=req.body;
     const emailchecker=await User.findOne({email:newemail});
     if(emailchecker)
-        throw new error_structurer(400,"Email already in use");
+        throw new errorhandler(400,"Email already in use");
     const updateduser=await User.findByIdAndUpdate(
         req.user._id,
         { $set: { email: newemail } },
