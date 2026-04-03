@@ -1,4 +1,4 @@
-class error_structurer extends Error{
+class errorhandler extends Error{
     constructor(statusCode,message,errors=[]){
         super(message);
         this.statusCode=statusCode;
@@ -7,4 +7,4 @@ class error_structurer extends Error{
     }
 }
 
-export default error_structurer;
+export default errorhandler;
