@@ -46,7 +46,9 @@ const uploadsheet=asyncHandler(async(req,res)=>{
        // filepreviewsheets:`https://res.cloudinary.com/${process.env.cloudinary_name}/sheet/upload/pg_1,w_300,h_400,c_fill,q_auto,f_auto/pdfs/${cloudinaryresponse.public_id}.png`||"https://res.cloudinary.com/dzcmadjlq/sheet/upload/v1696543783/ClauseValidator/default_pdf_oyh3v0.png"
     });
     const savedsheet=await Sheet.findById(newsheet._id);
+    if(req.params.folderid){
     await Folder.findByIdAndUpdate(req.params.folderid,{$push:{sheets:savedsheet._id}});
+    }
     if(!savedsheet){
         return res.status(500).json(new errorhandler(500,"sheet not saved",[]));
     }
