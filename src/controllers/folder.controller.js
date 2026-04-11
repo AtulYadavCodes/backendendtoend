@@ -32,7 +32,7 @@ const deletefolder=asyncHandler(async(req,res)=>{
     if(!folder){
         throw new errorhandler(404,"folder not found",[]);
     }
-    const sheetsinfolder=folder.sheets;
+    const sheetsinfolder=Sheet.find({folder:folderid}).select("_id");
     await Sheet.deleteMany({_id:{$in:sheetsinfolder}});
     const deletedfolder=await Folder.findByIdAndDelete(folderid);
     return res.status(200).json(new responseHandler(200,"folder deleted successfully",deletedfolder._id));
@@ -41,11 +41,11 @@ const deletefolder=asyncHandler(async(req,res)=>{
 
 const allsheetsinfolder=asyncHandler(async(req,res)=>{
     const folderid=new mongoose.Types.ObjectId(req.params.folderid);
-    const folder=await Folder.findOne({_id:folderid}).populate("sheets");
-    if(!folder){
+    const sheets=await Sheet.find({folder:folderid})
+    if(!sheets||sheets.length===0){
         throw new errorhandler(404,"folder not found",[]);
     }
-    return res.status(200).json(new responseHandler(200,"sheets in folder fetched successfully",folder.sheets));
+    return res.status(200).json(new responseHandler(200,"sheets in folder fetched successfully",sheets));
 });
 
 export {createfolder,getalluserfolders,deletefolder};

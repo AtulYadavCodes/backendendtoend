@@ -4,10 +4,6 @@ const folderschema=new Schema({
         type:String,
         required:true
     },
-    sheets:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"sheet"
-    }],
     owner:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
