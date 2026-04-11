@@ -38,7 +38,11 @@ const userSchema=new Schema({
     },
     refreshTokens:{
         type:[String],
-    }
+    },
+    folders:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Folder"
+    }]
 },
 {
     timestamps:true
