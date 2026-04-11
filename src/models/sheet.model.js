@@ -18,6 +18,10 @@ const sheetschema=new Schema({
         type:Number,
         required:true
     }, 
+    folder:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Folder",
+    },
     filepreviewsheets:{
         type: String , //url cloudinary
         default:"https://res.cloudinary.com/dzcmadjlq/sheet/upload/v1696543783/ClauseValidator/default_pdf_oyh3v0.png"
