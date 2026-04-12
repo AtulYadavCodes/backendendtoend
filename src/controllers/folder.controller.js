@@ -48,4 +48,29 @@ const allsheetsinfolder=asyncHandler(async(req,res)=>{
     return res.status(200).json(new responseHandler(200,"sheets in folder fetched successfully",sheets));
 });
 
-export {createfolder,getalluserfolders,deletefolder,allsheetsinfolder};
+const queryfolder=asyncHandler(async(req,res)=>{
+
+    
+    //calls fastapi api to query the folder and return the response
+    //send the api req with body containing 
+    //chathistory(last 3) Qachat.find({userid:req.user._id,folderid:req.params.folderid}).sort({createdAt:-1}).limit(3)
+    //userquery
+    /* 
+    
+    const body={
+        chathistory:chathistory||[],
+        userquery:req.body.query||"first query"
+        //if userquery is first quer....then fast api will return just pandas basic 
+        //if user query is some question then fast api will send it to llm and return the response
+    }
+    */
+    const newQachat=await Qachat.create({
+        userid:req.user._id,
+        folderid:req.params.folderid,
+        userquery:req.body.query,
+        llmresponse:"llm response placeholder"
+    })
+
+    return res.status(200).json(new responseHandler(200,"folder queried successfully",newQachat));
+})
+export {createfolder,getalluserfolders,queryfolder,deletefolder,allsheetsinfolder};
