@@ -9,6 +9,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.static('public'));
+app.set('trust proxy', 1);
 
 
 //routes

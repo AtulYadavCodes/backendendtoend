@@ -4,6 +4,7 @@ import {User} from "../models/user.model.js";
 import uploadoncloudinary from "../utils/uploadoncloudinary.js";
 import responseHandler from "../utils/responseHandler.js"
 import jwt from "jsonwebtoken";
+import redis from "../db/redis.js";
 const generateAccessTokenandRefreshToken=async(userId)=>{
     try {
         const user=await User.findById(userId);
@@ -61,8 +62,15 @@ const loginuser=asyncHandler(async(req,res,next)=>{
     if(!userchecker)
         throw new errorhandler(400,"User does not exist");
     const isvalidpassword=await userchecker.isValidPassword(password);
+    const key=`login:${req.body.email}:${req.ip}`;
     if(!isvalidpassword)
-        throw new errorhandler(400,"Invalid credentials");  
+    {
+        await redis.incr(key);
+        console.log("Login attempts:",await redis.get(key));
+        await redis.expire(key,60);
+        throw new errorhandler(400,"Invalid credentials"); 
+    }
+    await redis.del(key);
     const {accessToken,refreshToken}=await generateAccessTokenandRefreshToken(userchecker._id);
     const loggedinuser= await User.findById(userchecker._id).select("-password -refreshtoken");
     const options={
