@@ -5,6 +5,7 @@ import errorhandler from "../utils/errorhandler.js";
 import responseHandler from "../utils/responseHandler.js";
 
 import mongoose from "mongoose";
+import { Qachat } from "../models/qachat.model.js";
 
 const createfolder=asyncHandler(async(req,res)=>{
     const newfolder=await Folder.create({
