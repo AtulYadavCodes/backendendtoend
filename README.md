@@ -70,7 +70,7 @@ Example:
 | 📚    | GET    | `/api/v1/folders/getalluserfolders`              | List all folders for current user | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
 | 🗑️    | DELETE | `/api/v1/folders/deletefolder/:folderid`         | Delete folder and related sheets  | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
 | 🧾    | GET    | `/api/v1/folders/getallsheetsinfolder/:folderid` | List all sheets in a folder       | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| ⬆️    | POST   | `/api/v1/sheets/uploadsheet/:folderid?`          | Upload a sheet (folder optional)  | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
+| ⬆️    | POST   | `/api/v1/sheets/uploadsheet/:folderid`           | Upload a sheet to a folder        | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
 
 ---
 
