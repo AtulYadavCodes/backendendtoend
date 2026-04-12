@@ -2,12 +2,13 @@ import {Router} from "express"
 import { upload } from "../middlewares/multer.middleware.js"
 import { loginuser, logoutuser, registerUser,refreshAccessToken, returnuserProfile,updateuseravatar,updateuserpassword,updateuseremail} from "../controllers/user.controller.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { log } from "console"
+
+import { ratelimMiddleware } from "../middlewares/ratelim.middleware.js"
 const router=Router()
 router.route('/register').post(
     upload.single('avatar'),
     registerUser)
-router.route('/login').post(upload.none(), loginuser)
+router.route('/login').post(upload.none(),ratelimMiddleware, loginuser)
 
 
 //secured routes 
