@@ -4,11 +4,16 @@ import { loginuser, logoutuser, registerUser,refreshAccessToken, returnuserProfi
 import { verifyJWT } from "../middlewares/auth.middleware.js"
 
 import { ratelimMiddleware } from "../middlewares/ratelim.middleware.js"
+import { verifyotp } from "../middlewares/verifyotp.middleware.js"
+import { createotpandmail } from "../controllers/otp.controller.js"
 const router=Router()
+//just gets user email and sends otp to email, no authentication required
+router.route('/otpsender').post(upload.none(),ratelimMiddleware("otp"),createotpandmail) 
 router.route('/register').post(
-    upload.single('avatar'),
-    registerUser)
-router.route('/login').post(upload.none(),ratelimMiddleware, loginuser)
+    upload.single('avatar'),verifyotp ,
+    registerUser) //once user click verify otp then this is invoked 
+                   //user is created only after otp verification
+router.route('/login').post(upload.none(),ratelimMiddleware("login"), loginuser)
 
 
 //secured routes 
