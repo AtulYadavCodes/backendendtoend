@@ -62,11 +62,11 @@ const loginuser=asyncHandler(async(req,res,next)=>{
     if(!userchecker)
         throw new errorhandler(400,"User does not exist");
     const isvalidpassword=await userchecker.isValidPassword(password);
-    const key=`login:${req.body.email}:${req.ip}`;
+    const key=`login${req.body.email}:${req.ip}`;
     if(!isvalidpassword)
     {
         await redis.incr(key);
-        await redis.expire(key,60);
+        await redis.expire(key,3600);
         throw new errorhandler(400,"Invalid credentials"); 
     }
     await redis.del(key);

@@ -1,4 +1,3 @@
-import { error } from "node:console";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import errorhandler from "../utils/errorhandler.js";
 import redis from "../db/redis.js";
