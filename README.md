@@ -1,41 +1,50 @@
 # SheetXray Backend
 
 <p>
-  <img src="https://img.shields.io/badge/Status-Active%20Development-2ea44f" alt="status" />
-  <img src="https://img.shields.io/badge/API-Express%205-0b7285" alt="express" />
-  <img src="https://img.shields.io/badge/Database-MongoDB-1b5e20" alt="mongodb" />
-  <img src="https://img.shields.io/badge/Cache-Redis-d9480f" alt="redis" />
+	<img src="https://img.shields.io/badge/SheetXray-Backend-0f766e" alt="SheetXray" />
+	<img src="https://img.shields.io/badge/Express-5-1d4ed8" alt="Express" />
+	<img src="https://img.shields.io/badge/MongoDB-Mongoose-16a34a" alt="MongoDB" />
+	<img src="https://img.shields.io/badge/Redis-Rate%20Limit-f97316" alt="Redis" />
+	<img src="https://img.shields.io/badge/Cloudinary-Uploads-db2777" alt="Cloudinary" />
 </p>
 
-## What This Project Is About
+SheetXray is the backend for a spreadsheet assistant that lets users register, log in, organize files into folders, upload sheet documents, and prepare data for future query/chat workflows.
 
-**SheetXray** is a backend service for a **RAG-style spreadsheet assistant** that works with uploaded Excel/Sheet-like documents.
+## Highlights
 
-The idea is:
+- User auth with JWT access and refresh tokens
+- OTP-based registration flow
+- Redis-backed rate limiting for login and OTP requests
+- Folder management for organizing uploaded sheets
+- File upload support through Multer and Cloudinary
+- Protected routes for user, folder, and sheet operations
 
-- Users upload sheet files.
-- Files are organized inside folders.
-- The backend stores file metadata and access control per user.
-- This foundation supports building a conversational layer where users can ask questions over their sheet data (RAG workflow).
+> Login and OTP endpoints are rate-limited through Redis to reduce abuse and repeated attempts.
 
-> Current codebase already supports auth, folder management, and sheet upload/storage. Chat/query endpoints are not yet exposed in the current routes.
+## Flow At A Glance
 
----
+```mermaid
+flowchart LR
+		A[Register] --> B[Send OTP]
+		B --> C[Verify OTP]
+		C --> D[Create User]
+		D --> E[Login]
+		E --> F[JWT Protected Routes]
+		E --> G[Rate Limited by Redis]
+		B --> H[Rate Limited by Redis]
+```
 
-## Current Functionalities
+## Tech Stack
 
-- 👤 User registration with avatar upload (Cloudinary)
-- 🔐 JWT-based authentication (access + refresh token)
-- 🚪 Login/logout flow with secure cookies
-- 🧯 Redis-backed login rate limiting
-- 🗂️ Folder creation, listing, deletion
-- 📄 Upload sheet files (multer + Cloudinary)
-- 🧩 Map uploaded sheets to optional folders
-- 🛡️ Protected routes via JWT middleware
+- Node.js
+- Express 5
+- MongoDB and Mongoose
+- Redis via ioredis
+- Multer for multipart form handling
+- Cloudinary for file storage
+- JWT and cookie-parser for authentication
 
----
-
-## Base API Prefix
+## API Base
 
 All routes are mounted under:
 
@@ -45,66 +54,46 @@ Example:
 
 `POST /api/v1/users/login`
 
----
+## Routes
 
-## 🟢 Non-Secured Routes (No JWT Required)
+### User Routes
 
-| Emoji | Method | Endpoint                           | Description                                     | Security                                                         |
-| ----- | ------ | ---------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
-| 📝    | POST   | `/api/v1/users/register`           | Register a new user with avatar upload          | ![Public](https://img.shields.io/badge/Public-Non--Secured-blue) |
-| 🔓    | POST   | `/api/v1/users/login`              | Login user and issue access/refresh tokens      | ![Public](https://img.shields.io/badge/Public-Non--Secured-blue) |
-| ♻️    | POST   | `/api/v1/users/refreshAccessToken` | Refresh access token using refresh token cookie | ![Public](https://img.shields.io/badge/Public-Non--Secured-blue) |
+| Method | Endpoint                            | Auth   | Purpose                                                    |
+| ------ | ----------------------------------- | ------ | ---------------------------------------------------------- |
+| POST   | `/api/v1/users/otpsender`           | Public | Send OTP to the provided email and apply OTP rate limiting |
+| POST   | `/api/v1/users/register`            | Public | Register a user after OTP verification                     |
+| POST   | `/api/v1/users/login`               | Public | Log in and issue tokens with login rate limiting           |
+| POST   | `/api/v1/users/refreshAccessToken`  | Public | Refresh the access token                                   |
+| POST   | `/api/v1/users/logout`              | JWT    | Log out the current user                                   |
+| GET    | `/api/v1/users/profile`             | JWT    | Get the logged-in user profile                             |
+| PATCH  | `/api/v1/users/updateprofileavatar` | JWT    | Update the user avatar                                     |
+| POST   | `/api/v1/users/updatepassword`      | JWT    | Update the user password                                   |
+| PATCH  | `/api/v1/users/updateemail`         | JWT    | Update the user email                                      |
 
----
+### Folder Routes
 
-## 🔒 Secured Routes (JWT Required)
+| Method | Endpoint                                         | Auth | Purpose                               |
+| ------ | ------------------------------------------------ | ---- | ------------------------------------- |
+| POST   | `/api/v1/folders/createfolder`                   | JWT  | Create a folder                       |
+| GET    | `/api/v1/folders/getalluserfolders`              | JWT  | List all folders for the current user |
+| DELETE | `/api/v1/folders/deletefolder/:folderid`         | JWT  | Delete a folder                       |
+| GET    | `/api/v1/folders/getallsheetsinfolder/:folderid` | JWT  | List all sheets in a folder           |
+| POST   | `/api/v1/folders/query/:folderid`                | JWT  | Query a folder                        |
 
-| Emoji | Method | Endpoint                                         | Description                       | Security                                                         |
-| ----- | ------ | ------------------------------------------------ | --------------------------------- | ---------------------------------------------------------------- |
-| 🚪    | POST   | `/api/v1/users/logout`                           | Logout current user               | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| 🙍    | GET    | `/api/v1/users/profile`                          | Get logged-in user profile        | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| 🖼️    | PATCH  | `/api/v1/users/updateprofileavatar`              | Update user avatar                | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| 🔑    | POST   | `/api/v1/users/updatepassword`                   | Update user password              | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| 📧    | PATCH  | `/api/v1/users/updateemail`                      | Update user email                 | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| 📁    | POST   | `/api/v1/folders/createfolder`                   | Create a folder for current user  | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| 📚    | GET    | `/api/v1/folders/getalluserfolders`              | List all folders for current user | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| 🗑️    | DELETE | `/api/v1/folders/deletefolder/:folderid`         | Delete folder and related sheets  | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| 🧾    | GET    | `/api/v1/folders/getallsheetsinfolder/:folderid` | List all sheets in a folder       | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
-| ⬆️    | POST   | `/api/v1/sheets/uploadsheet/:folderid`           | Upload a sheet to a folder        | ![Protected](https://img.shields.io/badge/Protected-Secured-red) |
+### Sheet Routes
 
----
+| Method | Endpoint                               | Auth | Purpose                         |
+| ------ | -------------------------------------- | ---- | ------------------------------- |
+| POST   | `/api/v1/sheets/uploadsheet/:folderid` | JWT  | Upload a sheet file to a folder |
 
-## Tech Stack
+## Environment Variables
 
-- Node.js + Express
-- MongoDB + Mongoose
-- Redis (ioredis)
-- Multer for multipart uploads
-- Cloudinary for file/media storage
-- JWT + cookie-parser for auth
-
----
-
-## Quick Start
-
-1. Install dependencies:
-
-```bash
-npm install
-```
-
-2. Start Redis (Docker compose file included):
-
-```bash
-docker compose up -d
-```
-
-3. Create `.env` in project root and configure at least:
+Create a `.env` file in the project root with values similar to:
 
 ```env
 PORT=3000
 CORS_ORIGIN=http://localhost:5173
-MONGODB_URI=your_mongodb_connection
+MONGODB_URI=mongodb://127.0.0.1:27017
 JWT_SECRET=your_access_secret
 JWT_EXPIRES_IN=1d
 JWT_REFRESH_SECRET=your_refresh_secret
@@ -112,24 +101,44 @@ JWT_REFRESH_EXPIRES_IN=7d
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 REDIS_PASSWORD=
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
+cloudinary_name=your_cloud_name
+cloudinary_api_key=your_api_key
+cloudinary_api_secret=your_api_secret
 ```
 
-4. Run server:
+## Local Setup
+
+1. Install dependencies.
+
+```bash
+npm install
+```
+
+2. Start Redis if you are using the included Docker Compose setup.
+
+```bash
+docker compose up -d
+```
+
+3. Create the `.env` file and fill in the variables above.
+
+4. Start the server.
 
 ```bash
 npm start
 ```
 
----
+## Project Structure
 
-## Next Milestone (RAG Layer)
+- `src/controllers` contains route handlers
+- `src/middlewares` contains auth, OTP, upload, and rate-limit middleware
+- `src/models` contains Mongoose schemas
+- `src/routes` defines the API endpoints
+- `src/utils` contains shared helpers
 
-To complete the sheet-chat vision, next backend additions can include:
+## Notes
 
-- Sheet parser + chunking pipeline
-- Embedding generation and vector storage
-- Retrieval endpoint for semantic context
-- Chat/query endpoint with grounded responses from uploaded sheets
+- The current backend already supports user auth, folder management, and sheet uploads.
+- Login and OTP requests are protected with Redis-backed rate limiting.
+- The query route is available on folders, which is the current entry point for spreadsheet question workflows.
+- Future RAG features can be layered on top of the existing upload and folder pipeline.
