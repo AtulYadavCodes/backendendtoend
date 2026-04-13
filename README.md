@@ -14,6 +14,8 @@ SheetXray is the backend for a spreadsheet assistant that lets users register, l
 
 - User auth with JWT access and refresh tokens
 - OTP-based registration flow
+- OTP generation using Node.js crypto module
+- OTP email delivery via Nodemailer
 - Redis-backed rate limiting for login and OTP requests
 - Folder management for organizing uploaded sheets
 - File upload support through Multer and Cloudinary
@@ -39,9 +41,11 @@ flowchart LR
 - Node.js
 - Express 5
 - MongoDB and Mongoose
+- Node.js crypto module for OTP generation
 - Redis via ioredis
 - Multer for multipart form handling
 - Cloudinary for file storage
+- Nodemailer for OTP email sending
 - JWT and cookie-parser for authentication
 
 ## API Base
@@ -104,7 +108,11 @@ REDIS_PASSWORD=
 cloudinary_name=your_cloud_name
 cloudinary_api_key=your_api_key
 cloudinary_api_secret=your_api_secret
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_app_password
 ```
+
+For Gmail SMTP, use a Google App Password in `EMAIL_PASS` instead of your normal account password.
 
 ## Local Setup
 
