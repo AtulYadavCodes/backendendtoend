@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 const folderschema=new Schema({
     foldername:{
         type:String,
@@ -13,4 +14,5 @@ const folderschema=new Schema({
 },{
     timestamps:true
 })
+folderschema.plugin(mongooseAggregatePaginate);
 export const Folder=mongoose.model("Folder",folderschema);
