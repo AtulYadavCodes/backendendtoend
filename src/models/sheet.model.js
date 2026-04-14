@@ -33,10 +33,10 @@ const sheetschema = new Schema(
     },
     processingStatus: {
       type: String,
-      enum: ["pending", "processing", "completed", "failed"],
+      enum: ["pending", "completed"],
       default: "pending",
     },
-    schema: {
+    fileschema: {
       fileid: {
         type: String,
       },
