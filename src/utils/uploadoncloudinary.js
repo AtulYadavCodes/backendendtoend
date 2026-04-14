@@ -17,7 +17,6 @@ import errorhandler from './errorhandler.js';
             });
             //file has been uploaded
             fs.unlinkSync(filePath); // Remove file from server after upload
-            console.log(result.url);
             return result;
         } catch (error) {    
             if(filePath&&fs.existsSync(filePath)){

@@ -21,14 +21,12 @@ const createotpandmail = asyncHandler(async (req, res) => {
     .json(new responseHandler(200, "OTP sent to email", null));
 });
 
-
-
 const nodemailermethod = async (email, otp) => {
   try {
     const info = await transporter.sendMail({
-      from: '"sheetxray" <academics.atul@gmail.com>', // sender address
+      from: '"Support@SheetXray" <academics.atul@gmail.com>', // sender address
       to: `${email}`, // list of recipients
-      subject: "otp verification ",
+      subject: "SheetXray verification code",
       text: `${otp}`,
       html: emailtemplate(otp),
     });
