@@ -45,8 +45,15 @@ const userSchema=new Schema({
     }],
     usertype:{
         type:String,
-        enum:["free","premium"],
+        enum:["free","premiumlifetime","premiummonthly"],
         default:"free"
+    },
+    waspremium:{
+        type:Boolean,
+        default:false
+    },
+    subscriptionExpiryDate:{
+        type:Date,
     }
 },
 {
