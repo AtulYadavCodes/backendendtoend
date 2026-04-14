@@ -26,11 +26,11 @@ const paymentSchema=new mongoose.Schema({
     },
     subscriptionstartdate:{
         type:Date,
-        required:true
+
     },
     subscriptionenddate:{
         type:Date,
-        required:true   
+        default:null
     }
 },{
     timestamps:true

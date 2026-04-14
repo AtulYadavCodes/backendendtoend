@@ -17,9 +17,11 @@ app.set('trust proxy', 1);
 import Userrouter from './routes/user.routes.js';
 import Sheetrouter from './routes/sheet.routes.js';
 import Folderrouter from './routes/folder.routes.js';
+ import Paymentrouter from './routes/payment.route.js';
 app.use('/api/v1/users',Userrouter)
 app.use('/api/v1/sheets',Sheetrouter)
 app.use('/api/v1/folders',Folderrouter)
+app.use('/api/v1/payments',Paymentrouter)
 
 const errormiddleware=(err,req,res,next)=>{
     const statusCode=err.statusCode||500;
